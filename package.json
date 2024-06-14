@@ -1,0 +1,19 @@
+{
+  "name": "asteroids",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --outfile=dist/index.js",
+    "build:watch": "esbuild index.ts --bundle --outfile=dist/index.js --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "pixi.js": "^8.1.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.1",
+    "esbuild": "^0.21.5"
+  }
+}
