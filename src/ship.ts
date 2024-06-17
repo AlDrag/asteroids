@@ -1,11 +1,11 @@
-import { Assets, Sprite } from "pixi.js";
+import { type Application, Assets, Sprite } from "pixi.js";
 
 export class PlayerShip {
 	private sprite!: Sprite;
 	private thrustVector = 0;
 	private accelerationFactor = 0;
 	private topSpeed = 8;
-	private maxAcceleration = 0.05;
+	private maxAcceleration = 0.07;
 	private rotationSpeed = 0.1;
 	private deceleration = 0.02;
 	private velocity = {
@@ -16,6 +16,7 @@ export class PlayerShip {
 	constructor(
 		private startPosition: { x: number; y: number },
 		private keysHeld: Set<string>,
+		private app: Application,
 	) {}
 
 	getSprite(): Sprite {
@@ -47,6 +48,8 @@ export class PlayerShip {
 		} else if (this.keysHeld.has("ArrowRight")) {
 			this.rotate("right", deltaTime);
 		}
+
+		this.wrapAround();
 	}
 
 	private thrust(): void {
@@ -107,7 +110,30 @@ export class PlayerShip {
 		this.thrustVector = this.sprite.rotation;
 	}
 
+	/**
+	 * When the Ship goes over the edge of the screen, it should appear
+	 * on the opposite side.
+	 */
+	private wrapAround(): void {
+		const halfWidth = this.sprite.width / 2;
+		const halfHeight = this.sprite.height / 2;
+		const screenWidth = this.app.screen.width;
+		const screenHeight = this.app.screen.height;
+
+		if (this.sprite.x > screenWidth + halfWidth) {
+			this.sprite.x = -halfWidth;
+		} else if (this.sprite.x < -halfWidth) {
+			this.sprite.x = screenWidth + halfWidth;
+		}
+
+		if (this.sprite.y > screenHeight + halfHeight) {
+			this.sprite.y = -halfHeight;
+		} else if (this.sprite.y < -halfHeight) {
+			this.sprite.y = screenHeight + halfHeight;
+		}
+	}
+
 	private easeOutQuad(t: number): number {
-		return t * (2 - t);
+		return 1 - (1 - t) ** 3;
 	}
 }

@@ -13,7 +13,11 @@ export class Game {
 			x: document.body.clientWidth / 2,
 			y: document.body.clientHeight / 2,
 		};
-		const playerShip = new PlayerShip(startPosition, new KeyState().keysHeld);
+		const playerShip = new PlayerShip(
+			startPosition,
+			new KeyState().keysHeld,
+			this.pixiApplication,
+		);
 		await playerShip.loadAssets();
 		this.pixiApplication.stage.addChild(playerShip.getSprite());
 
