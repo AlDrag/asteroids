@@ -1,4 +1,5 @@
 import { type Application, Assets, Sprite } from "pixi.js";
+import { Cannon } from "./weapons/cannon";
 
 export class PlayerShip {
 	private sprite!: Sprite;
@@ -12,12 +13,15 @@ export class PlayerShip {
 		x: 0,
 		y: 0,
 	};
+	private cannon: Cannon;
 
 	constructor(
 		private startPosition: { x: number; y: number },
 		private keysHeld: Set<string>,
 		private app: Application,
-	) {}
+	) {
+		this.cannon = new Cannon(this.app);
+	}
 
 	getSprite(): Sprite {
 		return this.sprite;
@@ -38,6 +42,20 @@ export class PlayerShip {
 			this.decelerate();
 		}
 
+		if (this.keysHeld.has("Space") && this.cannon.canShoot()) {
+			this.cannon.shoot(
+				this.sprite.x +
+					(Math.cos(this.sprite.rotation - 90 * (Math.PI / 180)) *
+						this.sprite.width) /
+						2,
+				this.sprite.y +
+					(Math.sin(this.sprite.rotation - 90 * (Math.PI / 180)) *
+						this.sprite.height) /
+						2,
+				this.sprite.rotation - 90 * (Math.PI / 180),
+			);
+		}
+
 		this.clampSpeed();
 
 		this.sprite.x += this.velocity.x * deltaTime;
@@ -48,6 +66,8 @@ export class PlayerShip {
 		} else if (this.keysHeld.has("ArrowRight")) {
 			this.rotate("right", deltaTime);
 		}
+
+		this.cannon.update(deltaTime);
 
 		this.wrapAround();
 	}
