@@ -1,4 +1,4 @@
-import { type Application, Graphics } from "pixi.js";
+import { type Application, Graphics, type PointLike } from "pixi.js";
 
 export class Cannon {
 	private rateOfFireMs = 500;
@@ -12,8 +12,8 @@ export class Cannon {
 		return !this.lastShot || +new Date() - +this.lastShot > this.rateOfFireMs;
 	}
 
-	shoot(x: number, y: number, vector: number) {
-		const projectile = new Projectile(x, y, vector);
+	shoot(startingPosition: PointLike, vector: number) {
+		const projectile = new Projectile(startingPosition, vector);
 		this.projectiles.push(projectile);
 		this.app.stage.addChild(projectile.getGraphic());
 		this.lastShot = new Date();
@@ -38,7 +38,7 @@ class Projectile {
 	private vector = 0;
 	private readonly maxDistance = 400;
 
-	constructor(x: number, y: number, vector: number) {
+	constructor({ x, y }: PointLike, vector: number) {
 		this.vector = vector;
 		const beginning = Math.cos(this.vector) * 10;
 		const end = Math.sin(this.vector) * 10;

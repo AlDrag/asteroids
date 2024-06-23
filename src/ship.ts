@@ -1,4 +1,4 @@
-import { type Application, Assets, Sprite } from "pixi.js";
+import { type Application, Assets, Sprite, Point } from "pixi.js";
 import { Cannon } from "./weapons/cannon";
 
 export class PlayerShip {
@@ -9,14 +9,11 @@ export class PlayerShip {
 	private maxAcceleration = 0.07;
 	private rotationSpeed = 0.1;
 	private deceleration = 0.02;
-	private velocity = {
-		x: 0,
-		y: 0,
-	};
+	private velocity = new Point();
 	private cannon: Cannon;
 
 	constructor(
-		private startPosition: { x: number; y: number },
+		private startPosition: Point,
 		private keysHeld: Set<string>,
 		private app: Application,
 	) {
@@ -31,8 +28,7 @@ export class PlayerShip {
 		await Assets.load({ src: "./assets/sprites/ship.png", alias: "ship" });
 		this.sprite = Sprite.from("ship");
 		this.sprite.anchor = 0.5;
-		this.sprite.x = this.startPosition.x;
-		this.sprite.y = this.startPosition.y;
+		this.sprite.position = this.startPosition.clone();
 	}
 
 	update(deltaTime: number) {
@@ -43,7 +39,7 @@ export class PlayerShip {
 		}
 
 		if (this.keysHeld.has("Space") && this.cannon.canShoot()) {
-			this.cannon.shoot(
+			const cannonMuzzlePoint = new Point(
 				this.sprite.x +
 					(Math.cos(this.sprite.rotation - 90 * (Math.PI / 180)) *
 						this.sprite.width) /
@@ -52,6 +48,9 @@ export class PlayerShip {
 					(Math.sin(this.sprite.rotation - 90 * (Math.PI / 180)) *
 						this.sprite.height) /
 						2,
+			);
+			this.cannon.shoot(
+				cannonMuzzlePoint,
 				this.sprite.rotation - 90 * (Math.PI / 180),
 			);
 		}

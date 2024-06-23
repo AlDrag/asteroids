@@ -1,10 +1,10 @@
-import { Assets, Sprite, type Application } from "pixi.js";
+import { Assets, type PointLike, Sprite, type Application } from "pixi.js";
 
 export class Asteroid {
 	private sprite!: Sprite;
 
 	constructor(
-		private velocity: { x: number; y: number },
+		private velocity: PointLike,
 		private app: Application,
 	) {}
 
