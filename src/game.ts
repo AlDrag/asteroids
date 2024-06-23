@@ -2,6 +2,7 @@ import { Application, Point } from "pixi.js";
 import { PlayerShip } from "./ship";
 import { KeyState } from "./key-state";
 import { Asteroid } from "./asteroid";
+import { collided } from "./collision-detector";
 
 export class Game {
 	private pixiApplication = new Application();
@@ -41,6 +42,19 @@ export class Game {
 			playerShip.update(ticker.deltaTime);
 			for (const asteroid of asteroids) {
 				asteroid.update(ticker.deltaTime);
+			}
+			const projectiles = playerShip.getWeapon().getProjectiles();
+			for (const projectile of projectiles) {
+				for (let i = 0; i < asteroids.length; i++) {
+					const asteroid = asteroids[i];
+					if (
+						collided(projectile.getBounds(), asteroid.getSprite().getBounds())
+					) {
+						playerShip.getWeapon().destroyProjectile(projectile);
+						this.pixiApplication.stage.removeChild(asteroid.getSprite());
+						asteroids.splice(i, 1);
+					}
+				}
 			}
 		});
 	}

@@ -1,5 +1,6 @@
 import { type Application, Assets, Sprite, Point } from "pixi.js";
 import { Cannon } from "./weapons/cannon";
+import type { Weapon } from "./weapons/weapon";
 
 export class PlayerShip {
 	private sprite!: Sprite;
@@ -22,6 +23,10 @@ export class PlayerShip {
 
 	getSprite(): Sprite {
 		return this.sprite;
+	}
+
+	getWeapon(): Weapon {
+		return this.cannon;
 	}
 
 	async loadAssets() {

@@ -1,4 +1,9 @@
-import { type Application, Graphics, type PointLike } from "pixi.js";
+import {
+	type Application,
+	Graphics,
+	type PointLike,
+	type Bounds,
+} from "pixi.js";
 
 export class Cannon {
 	private rateOfFireMs = 500;
@@ -17,6 +22,18 @@ export class Cannon {
 		this.projectiles.push(projectile);
 		this.app.stage.addChild(projectile.getGraphic());
 		this.lastShot = new Date();
+	}
+
+	getProjectiles(): Projectile[] {
+		return this.projectiles;
+	}
+
+	destroyProjectile(projectile: Projectile) {
+		this.app.stage.removeChild(projectile.getGraphic());
+		this.projectiles.splice(
+			this.projectiles.findIndex((p) => p === projectile),
+			1,
+		);
 	}
 
 	update(deltaTime: number) {
@@ -50,6 +67,10 @@ class Projectile {
 
 	getGraphic(): Graphics {
 		return this.projectileVector;
+	}
+
+	getBounds(): Bounds {
+		return this.projectileVector.getBounds();
 	}
 
 	hasExceededMaxDistance(): boolean {
