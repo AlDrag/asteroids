@@ -1,4 +1,4 @@
-import type { Bounds, PointData } from "pixi.js";
+import type { Bounds } from "pixi.js";
 
 export interface Weapon {
 	getProjectiles(): Projectile[];

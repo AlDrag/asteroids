@@ -1,12 +1,14 @@
 {
 	"name": "asteroids",
-	"version": "1.0.1",
-	"main": "index.js",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
 	"scripts": {
-		"build": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/index.js",
-		"build:watch": "esbuild src/index.ts --bundle --sourcemap --outfile=dist/index.js --watch"
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
 	},
-	"author": "",
+	"author": "aldragicevich@gmail.com",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
@@ -14,6 +16,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.1",
-		"esbuild": "0.23.1"
+		"esbuild": "0.23.1",
+		"typescript": "^5.5.3",
+		"vite": "^5.4.8"
 	}
 }
