@@ -1,4 +1,4 @@
-import { type Application, Assets, Sprite, Point } from "pixi.js";
+import { type Application, Sprite, Point } from "pixi.js";
 import { Cannon } from "./weapons/cannon";
 import type { Weapon } from "./weapons/weapon";
 
@@ -18,6 +18,10 @@ export class PlayerShip {
 		private keysHeld: Set<string>,
 		private app: Application,
 	) {
+		this.sprite = Sprite.from("ship");
+		this.sprite.anchor = 0.5;
+		this.sprite.position = this.startPosition.clone();
+
 		this.cannon = new Cannon(this.app);
 	}
 
@@ -27,13 +31,6 @@ export class PlayerShip {
 
 	getWeapon(): Weapon {
 		return this.cannon;
-	}
-
-	async loadAssets() {
-		await Assets.load({ src: "./assets/sprites/ship.png", alias: "ship" });
-		this.sprite = Sprite.from("ship");
-		this.sprite.anchor = 0.5;
-		this.sprite.position = this.startPosition.clone();
 	}
 
 	update(deltaTime: number) {

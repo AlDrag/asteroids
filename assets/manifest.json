@@ -1,0 +1,22 @@
+{
+	"bundles": [
+		{
+			"name": "player-ship",
+			"assets": [
+				{
+					"alias": "ship",
+					"src": "./assets/sprites/ship.png"
+				}
+			]
+		},
+		{
+			"name": "asteroids",
+			"assets": [
+				{
+					"alias": "asteroid",
+					"src": "./assets/sprites/asteroid.png"
+				}
+			]
+		}
+	]
+}

@@ -3,11 +3,13 @@ import { PlayerShip } from "./ship";
 import { KeyState } from "./key-state";
 import { Asteroid } from "./asteroid";
 import { collided } from "./collision-detector";
+import { loadAssets } from "./assets/loader";
 
 export class Game {
 	private pixiApplication = new Application();
 
 	async initialise() {
+		await loadAssets();
 		await this.pixiApplication.init({ resizeTo: window });
 		document.body.appendChild(this.pixiApplication.canvas);
 
@@ -31,10 +33,8 @@ export class Game {
 				this.pixiApplication,
 			);
 			asteroids[i] = asteroid;
-			await asteroid.loadAssets();
 			this.pixiApplication.stage.addChild(asteroid.getSprite());
 		}
-		await playerShip.loadAssets();
 		this.pixiApplication.stage.addChild(playerShip.getSprite());
 
 		// Render Loop.

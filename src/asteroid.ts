@@ -1,4 +1,4 @@
-import { Assets, type PointLike, Sprite, type Application } from "pixi.js";
+import { type PointLike, Sprite, type Application } from "pixi.js";
 
 export class Asteroid {
 	private sprite!: Sprite;
@@ -6,21 +6,15 @@ export class Asteroid {
 	constructor(
 		private velocity: PointLike,
 		private app: Application,
-	) {}
-
-	getSprite(): Sprite {
-		return this.sprite;
-	}
-
-	async loadAssets() {
-		await Assets.load({
-			src: "./assets/sprites/asteroid.png",
-			alias: "asteroid",
-		});
+	) {
 		this.sprite = Sprite.from("asteroid");
 		this.sprite.anchor = 0.5;
 		this.sprite.x = Math.round(Math.random()) * 1000 - 1;
 		this.sprite.y = Math.round(Math.random()) * 1000 - 1;
+	}
+
+	getSprite(): Sprite {
+		return this.sprite;
 	}
 
 	update(deltaTime: number) {
