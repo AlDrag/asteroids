@@ -6,7 +6,8 @@ import {
 } from "pixi.js";
 
 export class Cannon {
-	private rateOfFireMs = 500;
+	private readonly rateOfFireMs = 500;
+	private readonly velocity = 10;
 	private lastShot?: Date;
 
 	private projectiles: Projectile[] = [];
@@ -17,8 +18,12 @@ export class Cannon {
 		return !this.lastShot || +new Date() - +this.lastShot > this.rateOfFireMs;
 	}
 
-	shoot(startingPosition: PointLike, vector: number) {
-		const projectile = new Projectile(startingPosition, vector);
+	shoot(startingPosition: PointLike, vector: number, sourceVelocity: number) {
+		const projectile = new Projectile(
+			startingPosition,
+			vector,
+			this.velocity + sourceVelocity,
+		);
 		this.projectiles.push(projectile);
 		this.app.stage.addChild(projectile.getGraphic());
 		this.lastShot = new Date();
@@ -51,12 +56,13 @@ export class Cannon {
 
 class Projectile {
 	private projectileVector: Graphics;
-	private velocity = 10;
-	private vector = 0;
-	private readonly maxDistance = 400;
+	private readonly maxDistance = 1000;
 
-	constructor({ x, y }: PointLike, vector: number) {
-		this.vector = vector;
+	constructor(
+		{ x, y }: PointLike,
+		private vector: number,
+		private velocity: number,
+	) {
 		const beginning = Math.cos(this.vector) * 10;
 		const end = Math.sin(this.vector) * 10;
 		this.projectileVector = new Graphics()

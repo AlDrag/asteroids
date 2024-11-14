@@ -57,6 +57,8 @@ export class PlayerShip {
 			this.cannon.shoot(
 				cannonMuzzlePoint,
 				this.sprite.rotation - 90 * (Math.PI / 180),
+				// Ship's speed.
+				Math.hypot(this.velocity.x, this.velocity.y),
 			);
 		}
 
