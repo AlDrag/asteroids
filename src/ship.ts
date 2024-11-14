@@ -1,9 +1,20 @@
-import { type Application, Sprite, Point } from "pixi.js";
+import {
+	type Application,
+	type Sprite,
+	Point,
+	Texture,
+	AnimatedSprite,
+} from "pixi.js";
 import { Cannon } from "./weapons/cannon";
 import type { Weapon } from "./weapons/weapon";
 
 export class PlayerShip {
-	private sprite!: Sprite;
+	private shipTexture = Texture.from("ship");
+	private shipThrustTextures = [
+		Texture.from("shipThrust1"),
+		Texture.from("shipThrust2"),
+	];
+	private sprite!: AnimatedSprite;
 	private thrustVector = 0;
 	private accelerationFactor = 0;
 	private topSpeed = 8;
@@ -18,7 +29,8 @@ export class PlayerShip {
 		private keysHeld: Set<string>,
 		private app: Application,
 	) {
-		this.sprite = Sprite.from("ship");
+		this.sprite = new AnimatedSprite([this.shipTexture]);
+		this.sprite.animationSpeed = 0.4;
 		this.sprite.anchor = 0.5;
 		this.sprite.position = this.startPosition.clone();
 
@@ -81,6 +93,10 @@ export class PlayerShip {
 			this.maxAcceleration * this.easeOutQuad(this.accelerationFactor);
 		this.velocity.x += acceleration * Math.sin(this.thrustVector);
 		this.velocity.y += -acceleration * Math.cos(this.thrustVector);
+		if (!this.sprite.playing) {
+			this.sprite.textures = this.shipThrustTextures;
+			this.sprite.play();
+		}
 	}
 
 	private decelerate(): void {
@@ -93,6 +109,8 @@ export class PlayerShip {
 			this.velocity.x += -decelerationFactor * (this.velocity.x / currentSpeed);
 			this.velocity.y += -decelerationFactor * (this.velocity.y / currentSpeed);
 		}
+		this.sprite.stop();
+		this.sprite.textures = [this.shipTexture];
 	}
 
 	private clampSpeed() {

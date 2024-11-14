@@ -6,6 +6,14 @@
 				{
 					"alias": "ship",
 					"src": "./assets/sprites/ship.png"
+				},
+				{
+					"alias": "shipThrust1",
+					"src": "./assets/sprites/ship-thrust-1.png"
+				},
+				{
+					"alias": "shipThrust2",
+					"src": "./assets/sprites/ship-thrust-2.png"
 				}
 			]
 		},
