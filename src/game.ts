@@ -1,4 +1,4 @@
-import { Application, Point } from "pixi.js";
+import { Application, Graphics, Point } from "pixi.js";
 import { loadAssets } from "./assets/loader";
 import { Asteroid } from "./asteroid";
 import { collided } from "./collision-detector";
@@ -14,8 +14,9 @@ export class Game {
 		await loadAssets();
 		await this.pixiApplication.init({ resizeTo: window });
 		document.body.appendChild(this.pixiApplication.canvas);
+		document.body.style.cursor = "none"; // Hide OS cursor
 
-		const inputState = new InputState();
+		const inputState = new InputState(this.pixiApplication.canvas);
 		const shipStartWorldPos = new Point(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
 
 		const playerShip = new PlayerShip(
@@ -40,6 +41,15 @@ export class Game {
 
 		this.pixiApplication.stage.addChild(playerShip.getSprite());
 
+		const crosshair = new Graphics()
+			.circle(0, 0, 5)
+			.moveTo(-15, 0)
+			.lineTo(15, 0)
+			.moveTo(0, -15)
+			.lineTo(0, 15)
+			.stroke({ color: 0x00ff00, width: 2 });
+		this.pixiApplication.stage.addChild(crosshair);
+
 		// Render Loop.
 		// biome-ignore lint/suspicious/noExplicitAny: Ticker type changed in Pixi.js v8
 		this.pixiApplication.ticker.add((ticker: any) => {
@@ -53,11 +63,18 @@ export class Game {
 			const screenCenterX = this.pixiApplication.screen.width / 2;
 			const screenCenterY = this.pixiApplication.screen.height / 2;
 
-			starfield.update(playerShip, screenCenterX, screenCenterY);
+			// Slightly pan the camera towards the crosshair
+			const cameraPanOffsetX = inputState.crosshairOffset.x * 0.4;
+			const cameraPanOffsetY = inputState.crosshairOffset.y * 0.4;
 
-			// Always center the ship
-			playerShip.getSprite().x = screenCenterX;
-			playerShip.getSprite().y = screenCenterY;
+			const renderCenterX = screenCenterX - cameraPanOffsetX;
+			const renderCenterY = screenCenterY - cameraPanOffsetY;
+
+			starfield.update(playerShip, renderCenterX, renderCenterY);
+
+			// Always center the ship relative to camera pan
+			playerShip.getSprite().x = renderCenterX;
+			playerShip.getSprite().y = renderCenterY;
 
 			// Position asteroids relative to ship
 			for (const asteroid of asteroids) {
@@ -71,8 +88,8 @@ export class Game {
 					playerShip.worldY,
 					WORLD_HEIGHT,
 				);
-				asteroid.getSprite().x = screenCenterX + dx;
-				asteroid.getSprite().y = screenCenterY + dy;
+				asteroid.getSprite().x = renderCenterX + dx;
+				asteroid.getSprite().y = renderCenterY + dy;
 			}
 
 			// Position projectiles relative to ship
@@ -89,9 +106,13 @@ export class Game {
 					WORLD_HEIGHT,
 				);
 				const graphic = projectile.getGraphic();
-				graphic.x = screenCenterX + dx;
-				graphic.y = screenCenterY + dy;
+				graphic.x = renderCenterX + dx;
+				graphic.y = renderCenterY + dy;
 			}
+
+			// Position crosshair UI (not affected by camera pan, locked to physical screen/mouse)
+			crosshair.x = screenCenterX + inputState.crosshairOffset.x;
+			crosshair.y = screenCenterY + inputState.crosshairOffset.y;
 
 			// Collision detection
 			for (const projectile of projectiles) {

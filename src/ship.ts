@@ -52,17 +52,27 @@ export class PlayerShip {
 		return this.velocity;
 	}
 
-	update(deltaTime: number) {
-		const centerX = this.app.screen.width / 2;
-		const centerY = this.app.screen.height / 2;
+	public maxTurnSpeed = 0.08; // Radians per frame, configurable turn speed
 
-		// Aim towards mouse
-		this.sprite.rotation =
+	update(deltaTime: number) {
+		// Aim towards crosshair (which represents offset from screen center before camera pan)
+		const targetRotation =
 			Math.atan2(
-				this.inputState.mousePosition.y - centerY,
-				this.inputState.mousePosition.x - centerX,
+				this.inputState.crosshairOffset.y,
+				this.inputState.crosshairOffset.x,
 			) +
 			Math.PI / 2;
+
+		let diff = targetRotation - this.sprite.rotation;
+		while (diff > Math.PI) diff -= Math.PI * 2;
+		while (diff < -Math.PI) diff += Math.PI * 2;
+
+		const turnAmount = this.maxTurnSpeed * deltaTime;
+		if (Math.abs(diff) <= turnAmount) {
+			this.sprite.rotation = targetRotation;
+		} else {
+			this.sprite.rotation += Math.sign(diff) * turnAmount;
+		}
 
 		const forwardX = Math.cos(this.sprite.rotation - Math.PI / 2);
 		const forwardY = Math.sin(this.sprite.rotation - Math.PI / 2);
