@@ -4,6 +4,7 @@ import { Asteroid } from "./asteroid";
 import { collided } from "./collision-detector";
 import { InputState } from "./input-state";
 import { PlayerShip } from "./ship";
+import { Starfield } from "./starfield";
 import { WORLD_HEIGHT, WORLD_WIDTH, getShortestDelta } from "./world";
 
 export class Game {
@@ -23,6 +24,9 @@ export class Game {
 			this.pixiApplication,
 		);
 
+		const starfield = new Starfield(400);
+		this.pixiApplication.stage.addChild(starfield.getContainer());
+
 		const asteroids: Asteroid[] = new Array(30);
 		for (let i = 0; i < asteroids.length; i++) {
 			const asteroidVelocity = new Point(
@@ -38,7 +42,8 @@ export class Game {
 
 		// Render Loop.
 		// biome-ignore lint/suspicious/noExplicitAny: Ticker type changed in Pixi.js v8
-		this.pixiApplication.ticker.add((ticker: any) => {			playerShip.update(ticker.deltaTime);
+		this.pixiApplication.ticker.add((ticker: any) => {
+			playerShip.update(ticker.deltaTime);
 
 			for (const asteroid of asteroids) {
 				asteroid.update(ticker.deltaTime);
@@ -47,6 +52,8 @@ export class Game {
 			// Camera & Coordinate Transformation
 			const screenCenterX = this.pixiApplication.screen.width / 2;
 			const screenCenterY = this.pixiApplication.screen.height / 2;
+
+			starfield.update(playerShip, screenCenterX, screenCenterY);
 
 			// Always center the ship
 			playerShip.getSprite().x = screenCenterX;

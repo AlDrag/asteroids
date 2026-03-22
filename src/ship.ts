@@ -48,6 +48,10 @@ export class PlayerShip {
 		return this.cannon;
 	}
 
+	getVelocity(): Point {
+		return this.velocity;
+	}
+
 	update(deltaTime: number) {
 		const centerX = this.app.screen.width / 2;
 		const centerY = this.app.screen.height / 2;
