@@ -1,9 +1,10 @@
 import { Application, Point } from "pixi.js";
-import { PlayerShip } from "./ship";
-import { KeyState } from "./key-state";
+import { loadAssets } from "./assets/loader";
 import { Asteroid } from "./asteroid";
 import { collided } from "./collision-detector";
-import { loadAssets } from "./assets/loader";
+import { InputState } from "./input-state";
+import { PlayerShip } from "./ship";
+import { WORLD_HEIGHT, WORLD_WIDTH, getShortestDelta } from "./world";
 
 export class Game {
 	private pixiApplication = new Application();
@@ -13,37 +14,79 @@ export class Game {
 		await this.pixiApplication.init({ resizeTo: window });
 		document.body.appendChild(this.pixiApplication.canvas);
 
-		const shipStartPosition = new Point(
-			document.body.clientWidth / 2,
-			document.body.clientHeight / 2,
-		);
+		const inputState = new InputState();
+		const shipStartWorldPos = new Point(WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
+
 		const playerShip = new PlayerShip(
-			shipStartPosition,
-			new KeyState().keysHeld,
+			shipStartWorldPos,
+			inputState,
 			this.pixiApplication,
 		);
-		const asteroids: Asteroid[] = new Array(5);
+
+		const asteroids: Asteroid[] = new Array(30);
 		for (let i = 0; i < asteroids.length; i++) {
-			const asteroidStartPosition = new Point(
-				Math.round(Math.random()) * 4 - 1,
-				Math.round(Math.random()) * 4 - 1,
+			const asteroidVelocity = new Point(
+				(Math.random() - 0.5) * 4,
+				(Math.random() - 0.5) * 4,
 			);
-			const asteroid = new Asteroid(
-				asteroidStartPosition,
-				this.pixiApplication,
-			);
+			const asteroid = new Asteroid(asteroidVelocity, this.pixiApplication);
 			asteroids[i] = asteroid;
 			this.pixiApplication.stage.addChild(asteroid.getSprite());
 		}
+
 		this.pixiApplication.stage.addChild(playerShip.getSprite());
 
 		// Render Loop.
-		this.pixiApplication.ticker.add((ticker) => {
-			playerShip.update(ticker.deltaTime);
+		// biome-ignore lint/suspicious/noExplicitAny: Ticker type changed in Pixi.js v8
+		this.pixiApplication.ticker.add((ticker: any) => {			playerShip.update(ticker.deltaTime);
+
 			for (const asteroid of asteroids) {
 				asteroid.update(ticker.deltaTime);
 			}
+
+			// Camera & Coordinate Transformation
+			const screenCenterX = this.pixiApplication.screen.width / 2;
+			const screenCenterY = this.pixiApplication.screen.height / 2;
+
+			// Always center the ship
+			playerShip.getSprite().x = screenCenterX;
+			playerShip.getSprite().y = screenCenterY;
+
+			// Position asteroids relative to ship
+			for (const asteroid of asteroids) {
+				const dx = getShortestDelta(
+					asteroid.worldX,
+					playerShip.worldX,
+					WORLD_WIDTH,
+				);
+				const dy = getShortestDelta(
+					asteroid.worldY,
+					playerShip.worldY,
+					WORLD_HEIGHT,
+				);
+				asteroid.getSprite().x = screenCenterX + dx;
+				asteroid.getSprite().y = screenCenterY + dy;
+			}
+
+			// Position projectiles relative to ship
 			const projectiles = playerShip.getWeapon().getProjectiles();
+			for (const projectile of projectiles) {
+				const dx = getShortestDelta(
+					projectile.worldX,
+					playerShip.worldX,
+					WORLD_WIDTH,
+				);
+				const dy = getShortestDelta(
+					projectile.worldY,
+					playerShip.worldY,
+					WORLD_HEIGHT,
+				);
+				const graphic = projectile.getGraphic();
+				graphic.x = screenCenterX + dx;
+				graphic.y = screenCenterY + dy;
+			}
+
+			// Collision detection
 			for (const projectile of projectiles) {
 				for (let i = 0; i < asteroids.length; i++) {
 					const asteroid = asteroids[i];
@@ -53,6 +96,8 @@ export class Game {
 						playerShip.getWeapon().destroyProjectile(projectile);
 						this.pixiApplication.stage.removeChild(asteroid.getSprite());
 						asteroids.splice(i, 1);
+						// Once a projectile is destroyed, stop checking it
+						break;
 					}
 				}
 			}

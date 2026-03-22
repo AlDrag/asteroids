@@ -1,9 +1,10 @@
 import {
 	type Application,
+	type Bounds,
 	Graphics,
 	type PointLike,
-	type Bounds,
 } from "pixi.js";
+import { WORLD_HEIGHT, WORLD_WIDTH, wrapWorld } from "../world";
 
 export class Cannon {
 	private readonly rateOfFireMs = 500;
@@ -47,6 +48,7 @@ export class Cannon {
 			if (projectile.hasExceededMaxDistance()) {
 				this.app.stage.removeChild(projectile.getGraphic());
 				this.projectiles.splice(i, 1);
+				i--;
 			} else {
 				projectile.update(deltaTime);
 			}
@@ -57,17 +59,25 @@ export class Cannon {
 class Projectile {
 	private projectileVector: Graphics;
 	private readonly maxDistance = 1000;
+	private distanceTravelled = 0;
+
+	public worldX: number;
+	public worldY: number;
 
 	constructor(
-		{ x, y }: PointLike,
+		startPos: PointLike,
 		private vector: number,
 		private velocity: number,
 	) {
+		this.worldX = startPos.x;
+		this.worldY = startPos.y;
+
+		// The graphic starts drawn around 0,0 and we position it using Game render loop
 		const beginning = Math.cos(this.vector) * 10;
 		const end = Math.sin(this.vector) * 10;
 		this.projectileVector = new Graphics()
-			.moveTo(x, y)
-			.lineTo(x + beginning, y + end)
+			.moveTo(0, 0)
+			.lineTo(beginning, end)
 			.stroke({ color: 0xff3300, width: 4 });
 	}
 
@@ -80,18 +90,19 @@ class Projectile {
 	}
 
 	hasExceededMaxDistance(): boolean {
-		const travelledDistance = Math.sqrt(
-			(this.projectileVector.x - 0) ** 2 + (this.projectileVector.y - 0) ** 2,
-		);
-
-		return travelledDistance > this.maxDistance;
+		return this.distanceTravelled > this.maxDistance;
 	}
 
 	update(deltaTime: number) {
-		const x = Math.cos(this.vector) * this.velocity;
-		const y = Math.sin(this.vector) * this.velocity;
+		const dx = Math.cos(this.vector) * this.velocity * deltaTime;
+		const dy = Math.sin(this.vector) * this.velocity * deltaTime;
 
-		this.projectileVector.x += x * deltaTime;
-		this.projectileVector.y += y * deltaTime;
+		this.worldX += dx;
+		this.worldY += dy;
+
+		this.distanceTravelled += Math.hypot(dx, dy);
+
+		this.worldX = wrapWorld(this.worldX, WORLD_WIDTH);
+		this.worldY = wrapWorld(this.worldY, WORLD_HEIGHT);
 	}
 }

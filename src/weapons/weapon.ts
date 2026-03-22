@@ -1,4 +1,4 @@
-import type { Bounds, PointData } from "pixi.js";
+import type { Bounds, Container } from "pixi.js";
 
 export interface Weapon {
 	getProjectiles(): Projectile[];
@@ -7,4 +7,7 @@ export interface Weapon {
 
 export interface Projectile {
 	getBounds(): Bounds;
+	getGraphic(): Container;
+	worldX: number;
+	worldY: number;
 }
